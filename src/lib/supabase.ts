@@ -41,7 +41,7 @@ const createResilientFetch = <T>(
   fetchFn: () => Promise<T>,
   operation: string,
   maxRetries: number = 2,
-  timeoutMs: number = 25000 // Increased from 12000ms to 25000ms
+  timeoutMs: number = 4000
 ) => {
   return async (): Promise<T> => {
     let lastError: any = null;
@@ -96,7 +96,7 @@ export const signUpWithEmail = async (
     // Validate required fields
     validateRequiredFields({ email, password, name, joinCode });
     
-    // First, check if the join code is valid with increased timeout
+    // First, check if the join code is valid
     console.log('🔍 SignUp: Validating join code...');
     const orgPromise = supabase
       .from('organizations')
@@ -105,9 +105,8 @@ export const signUpWithEmail = async (
       .limit(1)
       .maybeSingle();
       
-    // Increased timeout from 10s to 20s
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Organization lookup timeout after 20s')), 20000)
+      setTimeout(() => reject(new Error('Organization lookup timeout after 6s')), 6000)
     );
     
     const { data: orgData, error: orgError } = await Promise.race([
@@ -255,7 +254,7 @@ export const signInWithGoogle = async () => {
     }
     
     const currentOrigin = window.location.origin;
-    const redirectTo = `${currentOrigin}/org-home`;
+    const redirectTo = `${currentOrigin}/post-auth`;
     
     console.log('🔗 Google OAuth: Redirect URL:', redirectTo);
 
@@ -354,7 +353,7 @@ export const getCurrentUser = async () => {
     },
     'GetCurrentUser',
     2, // Max 2 retries
-    25000 // Increased from 12000ms to 25000ms
+    4000 // 4s timeout
   );
   
   try {
@@ -401,7 +400,7 @@ export const getUserProfile = async (userId: string) => {
     },
     'GetUserProfile',
     2, // Max 2 retries
-    25000 // Increased from 12000ms to 25000ms
+    5000 // 5s timeout
   );
 
   try {
@@ -441,7 +440,7 @@ export const getOrgMembers = async (organization_id: string) => {
     },
     'GetOrgMembers',
     1, // Only 1 retry for member fetching
-    25000 // Increased from 15000ms to 25000ms
+    8000 // 8s timeout
   );
 
   try {
@@ -474,7 +473,7 @@ export const createUserProfileFromOAuth = async (
     
     console.log('🔑 OAuth Profile: Validating join code:', joinCode);
     
-    // Check if the join code is valid with increased timeout
+    // Check if the join code is valid
     const orgPromise = supabase
       .from('organizations')
       .select('id, name')
@@ -483,7 +482,7 @@ export const createUserProfileFromOAuth = async (
       .maybeSingle();
       
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Organization lookup timeout after 20s')), 20000) // Increased from 10s to 20s
+      setTimeout(() => reject(new Error('Organization lookup timeout after 5s')), 5000)
     );
     
     const { data: orgData, error: orgError } = await Promise.race([
@@ -577,7 +576,7 @@ export const getOrganizationByJoinCode = async (joinCode: string) => {
       return { data: null, error: { message: 'Join code is required' } };
     }
 
-    // Add timeout and limit - increased timeout
+    // Add timeout and limit
     const orgPromise = supabase
       .from('organizations')
       .select('id, name')
@@ -586,7 +585,7 @@ export const getOrganizationByJoinCode = async (joinCode: string) => {
       .maybeSingle();
       
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Organization lookup timeout after 20s')), 20000) // Increased from 10s to 20s
+      setTimeout(() => reject(new Error('Organization lookup timeout after 5s')), 5000)
     );
 
     const { data, error } = await Promise.race([orgPromise, timeoutPromise]) as any;

@@ -67,10 +67,10 @@ const OrgHome: React.FC = () => {
     try {
       console.log('👥 OrgHome: Loading members for organization:', profile.organization_id);
       
-      // Increased timeout from 15s to 25s
+      // Timeout for members fetch
       const membersPromise = getOrgMembers(profile.organization_id);
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Members load timeout after 25s')), 25000)
+        setTimeout(() => reject(new Error('Members load timeout after 10s')), 10000)
       );
       
       const { data, error: fetchError } = await Promise.race([
@@ -110,7 +110,7 @@ const OrgHome: React.FC = () => {
       
       const photosPromise = getOrganizationPhotos(memberIds);
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Photos load timeout')), 20000) // Increased from 12000ms to 20000ms
+        setTimeout(() => reject(new Error('Photos load timeout')), 8000)
       );
       
       const { data: photos, error: photosError } = await Promise.race([

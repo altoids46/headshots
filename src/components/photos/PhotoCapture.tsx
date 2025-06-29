@@ -207,26 +207,24 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
 
           <div className="space-y-3">
             {/* Mobile file input with camera capture */}
-            {isMobile && (
-              <div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                <Button
-                  fullWidth
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center justify-center"
-                >
-                  <Camera size={20} className="mr-2" />
-                  Take Photo
-                </Button>
-              </div>
-            )}
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <Button
+                fullWidth
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center justify-center"
+              >
+                <Camera size={20} className="mr-2" />
+                {isMobile ? 'Take Photo' : 'Use Camera'}
+              </Button>
+            </div>
 
             {/* Desktop camera access */}
             {!isMobile && supportsCamera && (
@@ -236,9 +234,10 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                 disabled={isInitializing}
                 isLoading={isInitializing}
                 className="flex items-center justify-center"
+                variant="outline"
               >
                 <Camera size={20} className="mr-2" />
-                Use Camera
+                Use Webcam
               </Button>
             )}
 
@@ -254,7 +253,19 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
               <Button
                 variant="outline"
                 fullWidth
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => {
+                  // Create a new input for regular file upload (without capture)
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = 'image/*';
+                  input.onchange = (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (file) {
+                      handleFileUpload({ target: { files: [file] } } as any);
+                    }
+                  };
+                  input.click();
+                }}
                 className="flex items-center justify-center"
               >
                 <Upload size={20} className="mr-2" />

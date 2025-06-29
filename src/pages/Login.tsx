@@ -82,12 +82,12 @@ const Login: React.FC = () => {
       }
       
       if (user) {
-        // Add timeout for auth status check - increased from 15s to 20s
+        // Add timeout for auth status check
         try {
           await Promise.race([
             checkAuthStatus(),
             new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Auth check timeout')), 20000)
+              setTimeout(() => reject(new Error('Auth check timeout')), 8000)
             )
           ]);
         } catch (authCheckError) {

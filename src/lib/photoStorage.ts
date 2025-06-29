@@ -17,7 +17,7 @@ export interface Photo {
   created_at: string;
 }
 
-const STORAGE_BUCKET = 'photos'; // Using default bucket name, update if different
+const STORAGE_BUCKET = 'member-photos';
 const MAX_PHOTOS_PER_USER = 5;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -76,14 +76,14 @@ export const uploadPhoto = async (
       return { success: false, error: 'File size must be less than 10MB' };
     }
 
-    // Check current photo count with retry - FIXED: Using correct column name with capital I
+    // Check current photo count with retry
     console.log('🔢 PhotoStorage: Checking current photo count...');
     
     const { data: existingPhotos, error: countError } = await withRetry(
       () => supabase
         .from('photos')
         .select('id')
-        .eq('takenbyuserId', userId) // FIXED: Capital I
+        .eq('"takenbyuserId"', userId)
         .limit(10),
       'Photo count check'
     );
@@ -135,14 +135,14 @@ export const uploadPhoto = async (
 
     console.log('🔗 PhotoStorage: Public URL generated:', urlData.publicUrl);
 
-    // Save metadata to database with retry - FIXED: Using correct column name with capital I
+    // Save metadata to database with retry
     console.log('💾 PhotoStorage: Saving metadata to database...');
     const { data: photoData, error: dbError } = await withRetry(
       () => supabase
         .from('photos')
         .insert([
           {
-            takenbyuserId: userId, // FIXED: Capital I
+            '"takenbyuserId"': userId,
             imageurl: urlData.publicUrl,
           }
         ])
@@ -173,7 +173,7 @@ export const uploadPhoto = async (
       data: {
         id: photoData.id,
         imageurl: photoData.imageurl,
-        takenbyuserId: photoData.takenbyuserId, // FIXED: Capital I
+        takenbyuserId: photoData['"takenbyuserId"'],
       }
     };
 
@@ -183,7 +183,7 @@ export const uploadPhoto = async (
   }
 };
 
-// Get all photos for a user with retry - FIXED: Using correct column name with capital I
+// Get all photos for a user with retry
 export const getUserPhotos = async (userId: string): Promise<{ data: Photo[] | null; error: string | null }> => {
   try {
     console.log('📋 PhotoStorage: Fetching photos for user:', userId);
@@ -192,7 +192,7 @@ export const getUserPhotos = async (userId: string): Promise<{ data: Photo[] | n
       () => supabase
         .from('photos')
         .select('*')
-        .eq('takenbyuserId', userId) // FIXED: Capital I
+        .eq('"takenbyuserId"', userId)
         .limit(10)
         .order('created_at', { ascending: false }),
       'User photos fetch'
@@ -221,7 +221,7 @@ export const deletePhoto = async (photoId: string): Promise<{ success: boolean; 
     const { data: photo, error: fetchError } = await withRetry(
       () => supabase
         .from('photos')
-        .select('imageurl, takenbyuserId') // FIXED: Capital I
+        .select('imageurl, "takenbyuserId"')
         .eq('id', photoId)
         .single(),
       'Photo fetch for deletion'
@@ -277,7 +277,7 @@ export const deletePhoto = async (photoId: string): Promise<{ success: boolean; 
   }
 };
 
-// Get photos for multiple users (for organization view) with retry - FIXED: Using correct column name with capital I
+// Get photos for multiple users (for organization view) with retry
 export const getOrganizationPhotos = async (userIds: string[]): Promise<{ data: Record<string, Photo[]> | null; error: string | null }> => {
   try {
     console.log('🏢 PhotoStorage: Fetching organization photos for users:', userIds.length);
@@ -290,7 +290,7 @@ export const getOrganizationPhotos = async (userIds: string[]): Promise<{ data: 
       () => supabase
         .from('photos')
         .select('*')
-        .in('takenbyuserId', userIds) // FIXED: Capital I
+        .in('"takenbyuserId"', userIds)
         .limit(250) // Limit to prevent large queries
         .order('created_at', { ascending: false }),
       'Organization photos fetch'
@@ -301,15 +301,16 @@ export const getOrganizationPhotos = async (userIds: string[]): Promise<{ data: 
       return { data: null, error: 'Failed to fetch organization photos' };
     }
 
-    // Group photos by takenbyuserId - FIXED: Capital I
+    // Group photos by takenbyuserId
     const photosByUser: Record<string, Photo[]> = {};
     userIds.forEach(userId => {
       photosByUser[userId] = [];
     });
 
     data?.forEach(photo => {
-      if (photosByUser[photo.takenbyuserId]) { // FIXED: Capital I
-        photosByUser[photo.takenbyuserId].push(photo as Photo); // FIXED: Capital I
+      const userId = photo['"takenbyuserId"'];
+      if (photosByUser[userId]) {
+        photosByUser[userId].push(photo as Photo);
       }
     });
 
