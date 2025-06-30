@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "OrganizationShots",
+    "slug": "organization-shots",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.organizationshots.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs access to camera to take headshot photos.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to photo library to select headshot photos."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.organizationshots.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "organizationshots",
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow OrganizationShots to access your camera to take headshot photos."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow OrganizationShots to access your photos to select headshot images."
+        }
+      ]
+    ]
+  }
+}
